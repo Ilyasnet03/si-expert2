@@ -1,0 +1,11 @@
+# version: '3.8'   ← Supprimez ou commentez cette ligne
+services:
+  db:
+    image: postgres:15
+    container_name: wafa_db_container
+    environment:
+      POSTGRES_DB: si_expert_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password111   # ← CHANGEZ ICI
+    ports:
+      - "5432:5432"

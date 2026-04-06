@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: si-expert
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/si_expert_db
+    username: postgres
+    password: password111
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # MODIFICATION : 'create-drop' pour vider la base et charger le script proprement
+      ddl-auto: create-drop
+    show-sql: true
+    # CRUCIAL : Attend la création des tables avant d'insérer les données du script
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+  # CONFIGURATION DES DONNÉES DE TEST
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+      data-locations: classpath:data.sql
+      encoding: UTF-8
+
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    time-zone: Africa/Casablanca
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# Configuration d'upload des fichiers
+app:
+  upload:
+    dir: ./uploads
+  port: 8080
+
+logging:
+  level:
+    com.wafa.assurance: DEBUG
+    org.hibernate.SQL: DEBUG
+    # Pour voir si le script SQL est bien exécuté
+    org.springframework.jdbc.datasource.init: DEBUG
