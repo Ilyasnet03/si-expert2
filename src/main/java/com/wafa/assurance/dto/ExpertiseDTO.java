@@ -1,9 +1,9 @@
 package com.wafa.assurance.dto;
 
 import com.wafa.assurance.model.Expertise;
+import com.wafa.assurance.model.TypeExpertise;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -12,25 +12,26 @@ import java.time.LocalDateTime;
 public class ExpertiseDTO {
     private Long id;
     private Long missionId;
+    private TypeExpertise typeExpertise;
     private LocalDate dateExpertise;
     private String lieu;
     private Integer kilometrage;
     private String etatVehicule;
     private String estimationDommages;
-    private BigDecimal montantEstimation;
+    private Double montantEstimation;
     private String calculVVADE;
     private String arbitrage;
     private String expertiseContradictoire;
     private LocalDate dateExpertiseContradictoire;
-    private BigDecimal montantExpertiseContradictoire;
+    private Double montantExpertiseContradictoire;
     private String observations;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDateTime dateCreation;
 
-    public static ExpertiseDTO from(Expertise expertise) {
+    public static ExpertiseDTO fromEntity(Expertise expertise) {
         ExpertiseDTO dto = new ExpertiseDTO();
         dto.setId(expertise.getId());
         dto.setMissionId(expertise.getMission().getId());
+        dto.setTypeExpertise(expertise.getTypeExpertise());
         dto.setDateExpertise(expertise.getDateExpertise());
         dto.setLieu(expertise.getLieu());
         dto.setKilometrage(expertise.getKilometrage());
@@ -43,8 +44,7 @@ public class ExpertiseDTO {
         dto.setDateExpertiseContradictoire(expertise.getDateExpertiseContradictoire());
         dto.setMontantExpertiseContradictoire(expertise.getMontantExpertiseContradictoire());
         dto.setObservations(expertise.getObservations());
-        dto.setCreatedAt(expertise.getCreatedAt());
-        dto.setUpdatedAt(expertise.getUpdatedAt());
+        dto.setDateCreation(expertise.getDateCreation());
         return dto;
     }
 }

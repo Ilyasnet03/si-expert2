@@ -1,12 +1,10 @@
 package com.wafa.assurance.dto;
 
 import com.wafa.assurance.model.Devis;
-import com.wafa.assurance.model.StatutDevis;
 import com.wafa.assurance.model.TypeDevis;
 import com.wafa.assurance.model.TypeOperation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,21 +14,17 @@ public class DevisDTO {
     private Long missionId;
     private String garage;
     private TypeDevis typeDevis;
-    private BigDecimal montantPieces;
-    private BigDecimal montantPeinture;
-    private BigDecimal montantMainOeuvre;
-    private BigDecimal montantTotal;
-    private BigDecimal montantAccordePieces;
-    private BigDecimal montantAccordePeinture;
-    private BigDecimal montantAccordeMainOeuvre;
-    private BigDecimal montantAccordeTotal;
+    private Double montantPieces;
+    private Double montantPeinture;
+    private Double montantMainOeuvre;
     private TypeOperation typeOperation;
-    private boolean expertiseContradictoire;
+    private Double montantTotal;
+    private Boolean demandeExpertiseContradictoire;
     private String observations;
-    private StatutDevis statut;
-    private String cheminImage;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDateTime dateCreation;
+    private Double montantPiecesAccorde;
+    private Double montantPeintureAccorde;
+    private Double montantMainOeuvreAccorde;
 
     public static DevisDTO fromEntity(Devis devis) {
         DevisDTO dto = new DevisDTO();
@@ -42,17 +36,20 @@ public class DevisDTO {
         dto.setMontantPeinture(devis.getMontantPeinture());
         dto.setMontantMainOeuvre(devis.getMontantMainOeuvre());
         dto.setMontantTotal(devis.getMontantTotal());
-        dto.setMontantAccordePieces(devis.getMontantAccordePieces());
-        dto.setMontantAccordePeinture(devis.getMontantAccordePeinture());
-        dto.setMontantAccordeMainOeuvre(devis.getMontantAccordeMainOeuvre());
-        dto.setMontantAccordeTotal(devis.getMontantAccordeTotal());
         dto.setTypeOperation(devis.getTypeOperation());
-        dto.setExpertiseContradictoire(devis.isExpertiseContradictoire());
+        dto.setDemandeExpertiseContradictoire(devis.getDemandeExpertiseContradictoire());
         dto.setObservations(devis.getObservations());
-        dto.setStatut(devis.getStatut());
-        dto.setCheminImage(devis.getCheminImage());
-        dto.setCreatedAt(devis.getCreatedAt());
-        dto.setUpdatedAt(devis.getUpdatedAt());
+        dto.setDateCreation(devis.getDateCreation());
+        dto.setMontantPiecesAccorde(devis.getMontantPiecesAccorde());
+        dto.setMontantPeintureAccorde(devis.getMontantPeintureAccorde());
+        dto.setMontantMainOeuvreAccorde(devis.getMontantMainOeuvreAccorde());
         return dto;
+    }
+
+    public Double getMontantTotalAccorde() {
+        if (montantPiecesAccorde != null && montantPeintureAccorde != null && montantMainOeuvreAccorde != null) {
+            return montantPiecesAccorde + montantPeintureAccorde + montantMainOeuvreAccorde;
+        }
+        return null;
     }
 }

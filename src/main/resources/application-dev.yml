@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: si-expert
+  
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  h2:
+    console:
+      enabled: true
+
+  sql:
+    init:
+      mode: never
+
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    time-zone: Africa/Casablanca
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+app:
+  upload:
+    dir: ./uploads
+  port: 8080
+
+logging:
+  level:
+    com.wafa.assurance: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# Configuration JWT
+jwt:
+  secret: mysupersecretkeythathas32characterslong!!!
+  expiration: 86400000

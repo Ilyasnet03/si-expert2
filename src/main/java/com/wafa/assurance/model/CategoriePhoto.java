@@ -1,12 +1,17 @@
 package com.wafa.assurance.model;
 
 public enum CategoriePhoto {
-    AVANT("Avant sinistre"),
-    APRES("Après sinistre"),
-    DETAIL("Détail sinistre"),
-    ORIGINAL("Pièce d'origine"),
-    DEVIS("Devis"),
-    DOCUMENT("Document");
+    DOCUMENT_BASE("Document de base"),
+    CONSTAT("Constat"),
+    VUE_GENERALE("Vue générale"),
+    DOMMAGES_AVANT("Dommages avant"),
+    DOMMAGES_ARRIERE("Dommages arrière"),
+    DOMMAGES_LATERAUX("Dommages latéraux"),
+    DOMMAGES_INTERIEUR("Dommages intérieur"),
+    SOUS_CAPOT("Sous capot"),
+    PLAQUE("Plaque"),
+    VIN("VIN"),
+    COMPTEUR("Compteur");
 
     private final String libelle;
 

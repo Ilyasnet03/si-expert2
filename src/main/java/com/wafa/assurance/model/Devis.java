@@ -4,17 +4,16 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "devis")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "devis")
 public class Devis {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,40 +22,62 @@ public class Devis {
     @JoinColumn(name = "mission_id", nullable = false)
     private Mission mission;
 
-    @Column(nullable = false)
+    @Column(name = "garage")
     private String garage;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type_devis")
     private TypeDevis typeDevis;
 
-    private BigDecimal montantPieces;
-    private BigDecimal montantPeinture;
-    private BigDecimal montantMainOeuvre;
-    private BigDecimal montantTotal;
+    @Column(name = "montant_pieces", precision = 10, scale = 2)
+    private Double montantPieces;
 
-    // Montants accordés par l'expert
-    private BigDecimal montantAccordePieces;
-    private BigDecimal montantAccordePeinture;
-    private BigDecimal montantAccordeMainOeuvre;
-    private BigDecimal montantAccordeTotal;
+    @Column(name = "montant_peinture", precision = 10, scale = 2)
+    private Double montantPeinture;
+
+    @Column(name = "montant_main_oeuvre", precision = 10, scale = 2)
+    private Double montantMainOeuvre;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type_operation")
     private TypeOperation typeOperation;
 
-    private boolean expertiseContradictoire;
+    @Column(name = "montant_total", precision = 10, scale = 2)
+    private Double montantTotal;
 
-    @Column(length = 1000)
+    @Column(name = "demande_expertise_contradictoire")
+    private Boolean demandeExpertiseContradictoire;
+
+    @Column(name = "observations", columnDefinition = "TEXT")
     private String observations;
 
-    @Enumerated(EnumType.STRING)
-    private StatutDevis statut;
+    @Column(name = "date_creation")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dateCreation;
 
-    // Chemin vers le fichier image (stockage disque)
-    private String cheminImage;
+    @Column(name = "montant_pieces_accorde", precision = 10, scale = 2)
+    private Double montantPiecesAccorde;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(name = "montant_peinture_accorde", precision = 10, scale = 2)
+    private Double montantPeintureAccorde;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Column(name = "montant_main_oeuvre_accorde", precision = 10, scale = 2)
+    private Double montantMainOeuvreAccorde;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.dateCreation == null) {
+            this.dateCreation = LocalDateTime.now();
+        }
+        if (this.demandeExpertiseContradictoire == null) {
+            this.demandeExpertiseContradictoire = false;
+        }
+    }
+
+    public Double getMontantTotalAccorde() {
+        if (montantPiecesAccorde != null && montantPeintureAccorde != null && montantMainOeuvreAccorde != null) {
+            return montantPiecesAccorde + montantPeintureAccorde + montantMainOeuvreAccorde;
+        }
+        return null;
+    }
 }
