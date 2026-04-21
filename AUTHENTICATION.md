@@ -1,148 +1,126 @@
 # Authentification SI Expert
 
-## Configuration
+## Vue d'ensemble
+
+L'application utilise maintenant Keycloak comme fournisseur d'identité.
 
 ### Frontend (React)
 
-L'authentification est gérée par un contexte React(`AuthContext.js`) qui fournit:
-- **login()** - Connexion avec email/mot de passe
-- **logout()** - Déconnexion
-- **register()** - Inscription d'un utilisateur
-- **user** - Données de l'utilisateur connecté
-- **loading** - État de chargement
-- **error** - Messages d'erreur
+L'authentification est gérée par le contexte React dans `frontend/src/context/AuthContext.js` avec l'appui de `frontend/src/services/keycloak.js`.
 
-#### Utilisation:
-```jsx
-import { useAuth } from '../context/AuthContext';
-
-function MyComponent() {
-  const { user, login, logout } = useAuth();
-  // ...
-}
-```
+- `login()` redirige vers Keycloak
+- `logout()` ferme la session Keycloak
+- `user` contient les informations extraites du token OpenID Connect
+- `loading` reflète l'initialisation de la session Keycloak
+- `error` expose les erreurs de configuration ou de session
 
 ### Service Axios
-Le fichier `services/axios.js` configure une instance axios avec:
-- Ajout automatique du token JWT dans le header `Authorization`
-- Redirection automatique vers la page de login si le token expire (erreur 401)
 
-### Page de Login
-La page `components/Login.js` offre:
-- Formulaire de connexion
-- Formulaire d'inscription
-- Affichage des erreurs
-- Design moderne avec dégradé
+Le fichier `frontend/src/services/axios.js` ajoute automatiquement le bearer token Keycloak sur chaque requête API.
 
-## Backend (Spring Boot)
+### Backend (Spring Boot)
 
-### Dépendances
-- Spring Security
-- JWT (jjwt)
+Le backend agit comme `OAuth2 Resource Server` et valide les JWT émis par Keycloak via `issuer-uri`.
 
-### Configuration
-Modifiez `application.yml`:
-```yaml
-jwt:
-  secret: mysupersecretkeythathas32characterslong!!!  # À changer en production!
-  expiration: 86400000  # 24 heures en ms
+- `SecurityConfig` convertit les rôles Keycloak en autorités Spring `ROLE_ADMIN` et `ROLE_EXPERT`
+- `GET /api/auth/me` permet de lire les informations utilisateur depuis le token courant
+- `POST /api/auth/login` et `POST /api/auth/register` sont volontairement désactivés
+
+## Démarrage local rapide
+
+### Services Docker
+
+Le projet fournit maintenant Keycloak dans [docker-compose.yml](docker-compose.yml).
+
+```bash
+docker compose up -d db keycloak
 ```
 
-### Classes principales
+### Console Keycloak
 
-#### AuthController
-- `POST /api/auth/login` - Connexion
-  - Body: `{ "email": "user@example.com", "password": "password" }`
-  - Response: `{ "token": "JWT...", "user": { "id", "email", "nom", "prenom" } }`
+- URL: `http://localhost:8081`
+- Admin: `admin`
+- Mot de passe: `admin`
 
-- `POST /api/auth/register` - Inscription
-  - Body: `{ "email", "password", "nom", "prenom" }`
+### Realm importé automatiquement
 
-#### Services
-- **AuthService**: Gère login/register
-- **JwtService**: Gère la génération et validation du JWT
+Le realm de développement est importé depuis `keycloak/import/si-expert-realm.json`.
 
-#### Security
-- **JwtAuthenticationFilter**: Vérifie le token JWT à chaque requête
-- **SecurityConfig**: Configure Spring Security avec:
-  - CORS activé pour `http://localhost:3000`
-  - CSRF désactivé pour l'API
-  - Sessions stateless (JWT)
-  - Endpoints `/api/auth/**` publics
-  - Autres endpoints protégés
+Configuration incluse:
+
+- Realm: `si-expert`
+- Client public: `si-expert-frontend`
+- Redirect URI: `http://localhost:3000/*`
+- Web origin: `http://localhost:3000`
+- Rôles: `ADMIN`, `EXPERT`
+
+### Utilisateurs de test
+
+- `admin` / `admin123` avec rôle `ADMIN`
+- `expert` / `expert123` avec rôle `EXPERT`
+
+## Variables d'environnement
+
+### Frontend
+
+```env
+REACT_APP_API_BASE_URL=http://localhost:8080/api
+REACT_APP_KEYCLOAK_URL=http://localhost:8081
+REACT_APP_KEYCLOAK_REALM=si-expert
+REACT_APP_KEYCLOAK_CLIENT_ID=si-expert-frontend
+```
+
+### Backend
+
+```env
+FRONTEND_URL=http://localhost:3000
+KEYCLOAK_ISSUER_URI=http://localhost:8081/realms/si-expert
+```
 
 ## Flux d'authentification
 
-```
-1. Utilisateur se connecte via la page Login
-   ↓
-2. Appel POST /api/auth/login avec email/password
-   ↓
-3. Backend valide et génère un JWT
-   ↓
-4. Frontend stocke le token et l'utilisateur dans localStorage
-   ↓
-5. AuthContext met à jour l'état (user)
-   ↓
-6. App.js redisplay le Dashboard au lieu de Login
-   ↓
-7. Chaque requête API inclut: Authorization: Bearer {token}
-   ↓
-8. JwtAuthenticationFilter valide le token
-   ↓
-9. Si le token expire: erreur 401 → logout automatique
+```text
+1. L'utilisateur ouvre l'application React
+2. AuthContext initialise Keycloak avec check-sso
+3. Si aucune session n'existe, le bouton de login redirige vers Keycloak
+4. Keycloak authentifie l'utilisateur
+5. Keycloak renvoie un access token au frontend
+6. Axios envoie Authorization: Bearer <token>
+7. Spring Security valide le JWT via l'issuer Keycloak
+8. Les rôles du token protègent les endpoints API
 ```
 
-## Structure de la BD
+## Test manuel
 
-```sql
-CREATE TABLE users (
-  id BIGSERIAL PRIMARY KEY,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  nom VARCHAR(255) NOT NULL,
-  prenom VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+### Tester l'authentification complète
 
-## Points de sécurité importants
-
-⚠️ **À faire en production:**
-1. Changer `jwt.secret` par une clé très longue et aléatoire
-2. Utiliser HTTPS (pas HTTP)
-3. Stocker le JWT dans un cookie secure/httpOnly (pas localStorage)
-4. Mettre en place une liste noire des tokens révoqués
-5. Ajouter du rate limiting sur /api/auth/login
-6. Ajouter une validation des emails (confirmation d'email)
-7. Ajouter du captcha sur le formulaire d'inscription
-
-## Test
-
-### Inscription
 ```bash
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123",
-    "nom": "Dupont",
-    "prenom": "Jean"
-  }'
+docker compose up -d db keycloak
+./mvnw spring-boot:run
+cd frontend
+npm start
 ```
 
-### Connexion
+Ensuite:
+
+1. Ouvrir `http://localhost:3000`
+2. Cliquer sur `Se connecter avec Keycloak`
+3. Utiliser `admin/admin123` ou `expert/expert123`
+
+### Tester l'API avec un token
+
+Après connexion, récupérez le token dans le navigateur puis utilisez:
+
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123"
-  }'
+curl http://localhost:8080/api/auth/me \
+  -H "Authorization: Bearer <token>"
 ```
 
-### Utiliser le token
-```bash
-curl http://localhost:8080/api/missions/dashboard/compteurs \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-```
+## Différence avec l'ancien système
+
+- Avant: le backend générait son propre JWT
+- Maintenant: le token est émis par Keycloak
+- Avant: les comptes étaient gérés dans l'application
+- Maintenant: les utilisateurs et rôles sont gérés par Keycloak
+- Avant: le login passait par `/api/auth/login`
+- Maintenant: la connexion passe par la page de login Keycloak

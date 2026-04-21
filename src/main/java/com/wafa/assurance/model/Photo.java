@@ -25,6 +25,9 @@ public class Photo {
     @Column(name = "url")
     private String url;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "categorie")
     private CategoriePhoto categorie;
@@ -32,6 +35,15 @@ public class Photo {
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private TypePhoto type;
+
+    @Column(name = "chemin_fichier")
+    private String cheminFichier;
+
+    @Column(name = "nom_original")
+    private String nomOriginal;
+
+    @Column(name = "taille_fichier")
+    private Long tailleFichier;
 
     @Column(name = "date_upload")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

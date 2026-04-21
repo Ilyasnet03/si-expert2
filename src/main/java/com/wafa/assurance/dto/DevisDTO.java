@@ -1,10 +1,12 @@
 package com.wafa.assurance.dto;
 
 import com.wafa.assurance.model.Devis;
+import com.wafa.assurance.model.StatutDevis;
 import com.wafa.assurance.model.TypeDevis;
 import com.wafa.assurance.model.TypeOperation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,17 +16,20 @@ public class DevisDTO {
     private Long missionId;
     private String garage;
     private TypeDevis typeDevis;
-    private Double montantPieces;
-    private Double montantPeinture;
-    private Double montantMainOeuvre;
+    private BigDecimal montantPieces;
+    private BigDecimal montantPeinture;
+    private BigDecimal montantMainOeuvre;
     private TypeOperation typeOperation;
-    private Double montantTotal;
+    private BigDecimal montantTotal;
     private Boolean demandeExpertiseContradictoire;
     private String observations;
+    private StatutDevis statut;
+    private String cheminImage;
     private LocalDateTime dateCreation;
-    private Double montantPiecesAccorde;
-    private Double montantPeintureAccorde;
-    private Double montantMainOeuvreAccorde;
+    private BigDecimal montantPiecesAccorde;
+    private BigDecimal montantPeintureAccorde;
+    private BigDecimal montantMainOeuvreAccorde;
+    private TypeOperation typeOperationAccorde;
 
     public static DevisDTO fromEntity(Devis devis) {
         DevisDTO dto = new DevisDTO();
@@ -39,16 +44,19 @@ public class DevisDTO {
         dto.setTypeOperation(devis.getTypeOperation());
         dto.setDemandeExpertiseContradictoire(devis.getDemandeExpertiseContradictoire());
         dto.setObservations(devis.getObservations());
+        dto.setStatut(devis.getStatut());
+        dto.setCheminImage(devis.getCheminImage());
         dto.setDateCreation(devis.getDateCreation());
         dto.setMontantPiecesAccorde(devis.getMontantPiecesAccorde());
         dto.setMontantPeintureAccorde(devis.getMontantPeintureAccorde());
         dto.setMontantMainOeuvreAccorde(devis.getMontantMainOeuvreAccorde());
+        dto.setTypeOperationAccorde(devis.getTypeOperationAccorde());
         return dto;
     }
 
-    public Double getMontantTotalAccorde() {
+    public BigDecimal getMontantTotalAccorde() {
         if (montantPiecesAccorde != null && montantPeintureAccorde != null && montantMainOeuvreAccorde != null) {
-            return montantPiecesAccorde + montantPeintureAccorde + montantMainOeuvreAccorde;
+            return montantPiecesAccorde.add(montantPeintureAccorde).add(montantMainOeuvreAccorde);
         }
         return null;
     }

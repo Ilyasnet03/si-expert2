@@ -1,0 +1,84 @@
+{
+  "realm": "si-expert",
+  "enabled": true,
+  "displayName": "SI Expert",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Administrateur SI Expert"
+      },
+      {
+        "name": "EXPERT",
+        "description": "Expert SI Expert"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "si-expert-frontend",
+      "name": "SI Expert Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "protocol": "openid-connect",
+      "rootUrl": "http://localhost:3000",
+      "baseUrl": "http://localhost:3000",
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "SI Expert",
+      "email": "admin@si-expert.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "username": "expert",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Expert",
+      "lastName": "SI Expert",
+      "email": "expert@si-expert.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "expert123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "EXPERT"
+      ]
+    }
+  ]
+}

@@ -1,11 +1,22 @@
-# version: '3.8'   ← Supprimez ou commentez cette ligne
 services:
   db:
     image: postgres:15
-    container_name: wafa_db_container
     environment:
       POSTGRES_DB: si_expert_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password111   # ← CHANGEZ ICI
     ports:
       - "5432:5432"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.4
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import

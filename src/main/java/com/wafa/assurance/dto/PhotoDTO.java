@@ -16,6 +16,8 @@ public class PhotoDTO {
     private CategoriePhoto categorie;
     private TypePhoto type;
     private String description;
+    private String nomOriginal;
+    private Long tailleFichier;
     private LocalDateTime dateUpload;
 
     public static PhotoDTO fromEntity(Photo photo) {
@@ -26,7 +28,13 @@ public class PhotoDTO {
         dto.setCategorie(photo.getCategorie());
         dto.setType(photo.getType());
         dto.setDescription(photo.getDescription());
+        dto.setNomOriginal(photo.getNomOriginal());
+        dto.setTailleFichier(photo.getTailleFichier());
         dto.setDateUpload(photo.getDateUpload());
         return dto;
+    }
+
+    public static PhotoDTO from(Photo photo) {
+        return fromEntity(photo);
     }
 }

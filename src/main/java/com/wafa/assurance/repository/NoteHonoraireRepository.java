@@ -9,7 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface NoteHonoraireRepository extends JpaRepository<NoteHonoraire, Long> {
-    List<NoteHonoraire> findByMissionIdOrderByCreatedAtDesc(Long missionId);
+    List<NoteHonoraire> findByMissionIdOrderByDateCreationDesc(Long missionId);
+    List<NoteHonoraire> findAllByOrderByDateCreationDesc();
     Optional<NoteHonoraire> findById(Long id);
     Optional<NoteHonoraire> findByNumeroNote(String numeroNote);
     void deleteById(Long id);

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,8 +23,35 @@ public class NoteHonoraire {
     @JoinColumn(name = "mission_id", nullable = false)
     private Mission mission;
 
+    @Column(name = "numero_note")
+    private String numeroNote;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "montant", precision = 10, scale = 2)
-    private Double montant;
+    private BigDecimal montant;
+
+    @Column(name = "montant_ht", precision = 10, scale = 2)
+    private BigDecimal montantHT;
+
+    @Column(name = "taux_tva", precision = 10, scale = 2)
+    private BigDecimal tauxTVA;
+
+    @Column(name = "montant_tva", precision = 10, scale = 2)
+    private BigDecimal montantTVA;
+
+    @Column(name = "montant_ttc", precision = 10, scale = 2)
+    private BigDecimal montantTTC;
+
+    @Column(name = "observations", columnDefinition = "TEXT")
+    private String observations;
+
+    @Column(name = "chemin_fichier")
+    private String cheminFichier;
+
+    @Column(name = "nom_fichier")
+    private String nomFichier;
 
     @Column(name = "url_fichier")
     private String urlFichier;

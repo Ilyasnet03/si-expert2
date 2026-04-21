@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard Expert</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div th:replace="fragments/expert-header :: header"></div>
+<div class="container mt-4">
+    <div class="row text-center">
+        <div class="col"><div class="card"><div class="card-body"><h5>Missions</h5><h2 th:text="${kpis.nbMissions}"></h2></div></div></div>
+        <div class="col"><div class="card"><div class="card-body"><h5>Expertises</h5><h2 th:text="${kpis.nbExpertises}"></h2></div></div></div>
+        <div class="col"><div class="card"><div class="card-body"><h5>Sinistres</h5><h2 th:text="${kpis.nbSinistres}"></h2></div></div></div>
+        <div class="col"><div class="card"><div class="card-body"><h5>Montant total</h5><h2 th:text="${kpis.montantTotal} + ' MAD'"></h2></div></div></div>
+    </div>
+</div>
+</body>
+</html>

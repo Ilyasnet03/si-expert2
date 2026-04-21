@@ -31,10 +31,13 @@ public class DevisService {
     @Autowired
     private MissionRepository missionRepository;
 
+    @Autowired
+    private NotificationCenterService notificationCenterService;
+
     private static final String UPLOAD_DIR = "./uploads";
 
     public List<DevisDTO> findByMission(Long missionId) {
-        return devisRepository.findByMissionIdOrderByCreatedAtDesc(missionId)
+        return devisRepository.findByMissionIdOrderByDateCreationDesc(missionId)
             .stream()
             .map(DevisDTO::fromEntity)
             .collect(Collectors.toList());
@@ -53,7 +56,7 @@ public class DevisService {
         devis.setMontantMainOeuvre(req.getMontantMainOeuvre());
         devis.setMontantTotal(req.getMontantTotal());
         devis.setTypeOperation(TypeOperation.valueOf(req.getTypeOperation()));
-        devis.setExpertiseContradictoire(req.isExpertiseContradictoire());
+        devis.setDemandeExpertiseContradictoire(req.isExpertiseContradictoire());
         devis.setObservations(req.getObservations());
         devis.setStatut(StatutDevis.EN_ATTENTE);
 
@@ -64,6 +67,12 @@ public class DevisService {
         }
 
         Devis saved = devisRepository.save(devis);
+        notificationCenterService.publish(
+            "DEVIS_RECU",
+            "Réception du devis de réparation",
+            "Un devis " + saved.getTypeDevis().getLibelle() + " a été ajouté pour la mission " + mission.getRefSinistre(),
+            "/missions/" + missionId + "/devis"
+        );
         return DevisDTO.fromEntity(saved);
     }
 
@@ -71,10 +80,13 @@ public class DevisService {
         Devis devis = devisRepository.findById(devisId)
             .orElseThrow(() -> new RuntimeException("Devis non trouvé: " + devisId));
 
-        devis.setMontantAccordePieces(req.getMontantAccordePieces());
-        devis.setMontantAccordePeinture(req.getMontantAccordePeinture());
-        devis.setMontantAccordeMainOeuvre(req.getMontantAccordeMainOeuvre());
-        devis.setMontantAccordeTotal(req.getMontantAccordeTotal());
+        devis.setMontantPiecesAccorde(req.getMontantAccordePieces());
+        devis.setMontantPeintureAccorde(req.getMontantAccordePeinture());
+        devis.setMontantMainOeuvreAccorde(req.getMontantAccordeMainOeuvre());
+        if (req.getTypeOperationAccorde() != null) {
+            devis.setTypeOperationAccorde(TypeOperation.valueOf(req.getTypeOperationAccorde()));
+        }
+        // Le total accordé est calculé automatiquement par getMontantTotalAccorde()
         
         if (req.getObservations() != null) {
             devis.setObservations(req.getObservations());
@@ -83,7 +95,38 @@ public class DevisService {
         devis.setStatut(StatutDevis.ACCORDE);
 
         Devis updated = devisRepository.save(devis);
+        notificationCenterService.publish(
+            "DEVIS_ACC" + updated.getId(),
+            "Devis accordé",
+            "Le devis du garage " + updated.getGarage() + " a été accordé.",
+            "/missions/" + updated.getMission().getId() + "/devis"
+        );
         return DevisDTO.fromEntity(updated);
+    }
+
+    public DevisDTO update(Long devisId, DevisRequest req) {
+        Devis devis = devisRepository.findById(devisId)
+            .orElseThrow(() -> new RuntimeException("Devis non trouvé: " + devisId));
+
+        devis.setGarage(req.getGarage());
+        devis.setTypeDevis(TypeDevis.valueOf(req.getTypeDevis()));
+        devis.setMontantPieces(req.getMontantPieces());
+        devis.setMontantPeinture(req.getMontantPeinture());
+        devis.setMontantMainOeuvre(req.getMontantMainOeuvre());
+        devis.setMontantTotal(req.getMontantTotal());
+        devis.setTypeOperation(TypeOperation.valueOf(req.getTypeOperation()));
+        devis.setDemandeExpertiseContradictoire(req.isExpertiseContradictoire());
+        devis.setObservations(req.getObservations());
+        return DevisDTO.fromEntity(devisRepository.save(devis));
+    }
+
+    public java.nio.file.Path getImagePath(Long devisId) {
+        Devis devis = devisRepository.findById(devisId)
+            .orElseThrow(() -> new RuntimeException("Devis non trouvé: " + devisId));
+        if (devis.getCheminImage() == null) {
+            throw new RuntimeException("Aucune image associée à ce devis");
+        }
+        return Paths.get(devis.getCheminImage());
     }
 
     public void delete(Long devisId) throws IOException {

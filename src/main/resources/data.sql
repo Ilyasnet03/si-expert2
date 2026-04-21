@@ -1,176 +1,219 @@
 -- ============================================
--- DONNÉES DE TEST POUR L'APPLICATION SI-EXPERT
+-- DONNÉES DE TEST SIMPLES POUR SI-EXPERT
 -- ============================================
 
--- Supprimer les données existantes (version PostgreSQL)
-TRUNCATE TABLE missions RESTART IDENTITY CASCADE;
+-- Supprimer les données existantes
+DELETE FROM notes_honoraires;
+DELETE FROM missions;
+
+-- Les utilisateurs sont créés par DataSeeder avec BCrypt encoding
+
+-- Insérer quelques missions de test (seulement les champs obligatoires)
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-001', 'POL-001', '1234-AB-78', 'EAD', 'Standard', '0612345678', 'NOUVELLE', CURRENT_TIMESTAMP, 'Mission de test');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-002', 'POL-002', '5678-CD-90', 'Expertise', 'Express', '0698765432', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Mission en cours');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-003', 'POL-003', '1111-EF-12', 'EAD', 'Standard', '0611111111', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle mission EAD');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-004', 'POL-004', '2222-GH-34', 'Expertise', 'Express', '0622222222', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Expertise en cours');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-005', 'POL-005', '3333-IJ-56', 'Contrôle', 'Standard', '0633333333', 'REFUSEE', CURRENT_TIMESTAMP, 'Mission refusée - motif test');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-006', 'POL-006', '4444-KL-78', 'EAD', 'Express', '0644444444', 'CARENCE', CURRENT_TIMESTAMP, 'Mission en carence');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-007', 'POL-007', '5555-MN-90', 'Expertise', 'Standard', '0655555555', 'CLOTUREE', CURRENT_TIMESTAMP, 'Mission clôturée avec honoraires');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-008', 'POL-008', '6666-OP-12', 'Contrôle', 'Express', '0666666666', 'CLOTUREE', CURRENT_TIMESTAMP, 'Mission clôturée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-009', 'POL-009', '7777-QR-34', 'EAD', 'Standard', '0677777777', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle mission urgente');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-010', 'POL-010', '8888-ST-56', 'Expertise', 'Express', '0688888888', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Expertise complémentaire');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-011', 'POL-011', '9999-UV-78', 'EAD', 'Standard', '0699999999', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle mission EAD');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-012', 'POL-012', 'AAAA-WX-90', 'Contrôle', 'Express', '0600000000', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle en cours');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-013', 'POL-013', 'BBBB-YZ-12', 'Expertise', 'Standard', '0611111112', 'REFUSEE', CURRENT_TIMESTAMP, 'Refusée - véhicule non retrouvé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-014', 'POL-014', 'CCCC-AA-34', 'EAD', 'Express', '0622222223', 'CARENCE', CURRENT_TIMESTAMP, 'En attente dépassée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-015', 'POL-015', 'DDDD-BB-56', 'Contrôle', 'Standard', '0633333334', 'CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle clôturé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-016', 'POL-016', 'EEEE-CC-78', 'Expertise', 'Express', '0644444445', 'CLOTUREE', CURRENT_TIMESTAMP, 'Mission terminée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-017', 'POL-017', 'FFFF-DD-90', 'EAD', 'Standard', '0655555556', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle demande');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-018', 'POL-018', 'GGGG-EE-12', 'Contrôle', 'Express', '0666666667', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle technique');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-019', 'POL-019', 'HHHH-FF-34', 'Expertise', 'Standard', '0677777778', 'REFUSEE', CURRENT_TIMESTAMP, 'Refusée - dossier incomplet');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-020', 'POL-020', 'IIII-GG-56', 'EAD', 'Express', '0688888889', 'CARENCE', CURRENT_TIMESTAMP, 'Carence administrative');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-021', 'POL-021', 'JJJJ-HH-78', 'Contrôle', 'Standard', '0699999990', 'CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle clôturé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-022', 'POL-022', 'KKKK-II-90', 'Expertise', 'Express', '0600000001', 'CLOTUREE', CURRENT_TIMESTAMP, 'Expertise clôturée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-023', 'POL-023', 'LLLL-JJ-12', 'EAD', 'Standard', '0611111113', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle mission');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-024', 'POL-024', 'MMMM-KK-34', 'Contrôle', 'Express', '0622222224', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Vérification en cours');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-025', 'POL-025', 'NNNN-LL-56', 'Expertise', 'Standard', '0633333335', 'REFUSEE', CURRENT_TIMESTAMP, 'Refusée - sinistre prescrit');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-026', 'POL-026', 'OOOO-MM-78', 'EAD', 'Express', '0644444446', 'CARENCE', CURRENT_TIMESTAMP, 'Délai dépassé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-027', 'POL-027', 'PPPP-NN-90', 'Contrôle', 'Standard', '0655555557', 'CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle clôturé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-028', 'POL-028', 'QQQQ-OO-12', 'Expertise', 'Express', '0666666668', 'CLOTUREE', CURRENT_TIMESTAMP, 'Mission finalisée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-029', 'POL-029', 'RRRR-PP-34', 'EAD', 'Standard', '0677777779', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle expertise');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-030', 'POL-030', 'SSSS-QQ-56', 'Contrôle', 'Express', '0688888890', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle qualité');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-031', 'POL-031', 'TTTT-RR-78', 'Expertise', 'Standard', '0699999991', 'REFUSEE', CURRENT_TIMESTAMP, 'Refusée - absence de pièces');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-032', 'POL-032', 'UUUU-SS-90', 'EAD', 'Express', '0600000002', 'CARENCE', CURRENT_TIMESTAMP, 'Carence technique');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-033', 'POL-033', 'VVVV-TT-12', 'Contrôle', 'Standard', '0611111114', 'CLOTUREE', CURRENT_TIMESTAMP, 'Expertise clôturée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-034', 'POL-034', 'WWWW-UU-34', 'Expertise', 'Express', '0622222225', 'CLOTUREE', CURRENT_TIMESTAMP, 'Clôturée avec succès');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-035', 'POL-035', 'XXXX-VV-56', 'EAD', 'Standard', '0633333336', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle mission EAD');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-036', 'POL-036', 'YYYY-WW-78', 'Contrôle', 'Express', '0644444447', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Vérification express');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-037', 'POL-037', 'ZZZZ-XX-90', 'Expertise', 'Standard', '0655555558', 'REFUSEE', CURRENT_TIMESTAMP, 'Refusée - véhicule volé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-038', 'POL-038', 'AAAA-YY-12', 'EAD', 'Express', '0666666669', 'CARENCE', CURRENT_TIMESTAMP, 'En carence');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-039', 'POL-039', 'BBBB-ZZ-34', 'Contrôle', 'Standard', '0677777780', 'CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle clôturé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-040', 'POL-040', 'CCCC-AB-56', 'Expertise', 'Express', '0688888891', 'CLOTUREE', CURRENT_TIMESTAMP, 'Mission clôturée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-041', 'POL-041', 'DDDD-CD-78', 'EAD', 'Standard', '0699999992', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle demande expertise');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-042', 'POL-042', 'EEEE-EF-90', 'Contrôle', 'Express', '0600000003', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle en cours');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-043', 'POL-043', 'FFFF-GH-12', 'Expertise', 'Standard', '0611111115', 'REFUSEE', CURRENT_TIMESTAMP, 'Refusée - sinistre non couvert');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-044', 'POL-044', 'GGGG-IJ-34', 'EAD', 'Express', '0622222226', 'CARENCE', CURRENT_TIMESTAMP, 'Carence dépassée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-045', 'POL-045', 'HHHH-KL-56', 'Contrôle', 'Standard', '0633333337', 'CLOTUREE', CURRENT_TIMESTAMP, 'Contrôle clôturé');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-046', 'POL-046', 'IIII-MN-78', 'Expertise', 'Express', '0644444448', 'CLOTUREE', CURRENT_TIMESTAMP, 'Expertise terminée');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-047', 'POL-047', 'JJJJ-OP-90', 'EAD', 'Standard', '0655555559', 'NOUVELLE', CURRENT_TIMESTAMP, 'Nouvelle mission');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-048', 'POL-048', 'KKKK-QR-12', 'Contrôle', 'Express', '0666666670', 'NON_CLOTUREE', CURRENT_TIMESTAMP, 'Vérification technique');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-049', 'POL-049', 'LLLL-ST-34', 'Expertise', 'Standard', '0677777781', 'REFUSEE', CURRENT_TIMESTAMP, 'Refusée - dossier clos');
+
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, observations)
+VALUES ('TEST-050', 'POL-050', 'MMMM-UV-56', 'EAD', 'Express', '0688888892', 'CARENCE', CURRENT_TIMESTAMP, 'En attente prolongée');
 
 -- ============================================
--- MISSIONS NOUVELLES
+-- MISSIONS AVEC NOTES D'HONORAIRES
 -- ============================================
-INSERT INTO missions (
-    ref_sinistre, num_police, immatriculation, type_mission, parcours,
-    tel_assure, statut, date_creation, observations
-) VALUES
-      ('SN-2026-9901', 'POL-AZ-882', '1234 TU 78', 'EAD', 'Standard',
-       '0661223344', 'NOUVELLE', NOW(), 'Mission créée automatiquement'),
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, date_affectation, date_cloture, observations)
+VALUES ('HON-001', 'POL-HON-001', '1234-HON-01', 'Expertise', 'Standard', '0612000001', 'HONORAIRES', DATEADD('DAY', -30, CURRENT_TIMESTAMP), DATEADD('DAY', -28, CURRENT_TIMESTAMP), DATEADD('DAY', -5, CURRENT_TIMESTAMP), 'Expertise collision VL complet');
 
-      ('SIN2025-001', 'POL123456', '1234 TU 78', 'EAD', 'Classique',
-       '0612345678', 'NOUVELLE', NOW() - INTERVAL '2 hours',
-       'Véhicule accidenté - constat à vérifier'),
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, date_affectation, date_cloture, observations)
+VALUES ('HON-002', 'POL-HON-002', '5678-HON-02', 'EAD', 'Express', '0622000002', 'HONORAIRES', DATEADD('DAY', -20, CURRENT_TIMESTAMP), DATEADD('DAY', -18, CURRENT_TIMESTAMP), DATEADD('DAY', -3, CURRENT_TIMESTAMP), 'EAD véhicule utilitaire');
 
-      ('SIN2025-002', 'POL789012', '5678 AB 90', 'Choc direct', 'Express',
-       '0623456789', 'NOUVELLE', NOW() - INTERVAL '5 hours',
-       'Choc arrière - témoignages à collecter'),
-
-      ('SIN2025-003', 'POL345678', '9012 CD 34', 'EAD', 'Classique',
-       '0634567890', 'NOUVELLE', NOW() - INTERVAL '1 day',
-       'Dégâts des eaux - expertise urgente'),
-
-      ('SIN2025-004', 'POL901234', '3456 EF 56', 'Vol', 'Premium',
-       '0645678901', 'NOUVELLE', NOW() - INTERVAL '3 days',
-       'Vol de véhicule - enquête en cours');
+INSERT INTO missions (ref_sinistre, num_police, immatriculation, type_mission, parcours, tel_assure, statut, date_creation, date_affectation, date_cloture, observations)
+VALUES ('HON-003', 'POL-HON-003', '9012-HON-03', 'Contrôle', 'Standard', '0633000003', 'HONORAIRES', DATEADD('DAY', -15, CURRENT_TIMESTAMP), DATEADD('DAY', -13, CURRENT_TIMESTAMP), DATEADD('DAY', -2, CURRENT_TIMESTAMP), 'Contrôle technique post-réparation');
 
 -- ============================================
--- MISSIONS NON CLÔTURÉES
+-- NOTES D'HONORAIRES LIÉES AUX MISSIONS
 -- ============================================
-INSERT INTO missions (
-    ref_sinistre, num_police, immatriculation, type_mission, parcours,
-    tel_assure, statut, date_creation, date_affectation, observations
-) VALUES
-      ('SN-2026-1142', 'POL-VK-550', '5678 AB 90', 'Physique', 'Bris de Glace',
-       '0670998877', 'NON_CLOTUREE', NOW() - INTERVAL '1 day',
-       NOW() - INTERVAL '5 hours', 'Expertise en cours'),
+INSERT INTO notes_honoraires (mission_id, numero_note, description, montant_ht, taux_tva, montant_tva, montant_ttc, observations, date_creation, statut)
+VALUES (
+  (SELECT id FROM missions WHERE ref_sinistre = 'HON-001'),
+  'NOTE-2024-001',
+  'Honoraires expertise collision VL - rapport complet avec évaluation des dommages',
+  12000.00, 20.00, 2400.00, 14400.00,
+  'Note réceptionnée et en cours de traitement',
+  DATEADD('DAY', -4, CURRENT_TIMESTAMP),
+  'EMISE'
+);
 
-      ('SIN2025-005', 'POL567890', '7890 GH 12', 'EAD', 'Classique',
-       '0656789012', 'NON_CLOTUREE', NOW() - INTERVAL '2 days',
-       NOW() - INTERVAL '1 day', 'Expertise en cours - rendez-vous pris'),
+INSERT INTO notes_honoraires (mission_id, numero_note, description, montant_ht, taux_tva, montant_tva, montant_ttc, observations, date_creation, statut)
+VALUES (
+  (SELECT id FROM missions WHERE ref_sinistre = 'HON-001'),
+  'NOTE-2024-002',
+  'Complément honoraires - contre-expertise contradictoire',
+  4000.00, 20.00, 800.00, 4800.00,
+  'Note complémentaire suite à contestation',
+  DATEADD('DAY', -2, CURRENT_TIMESTAMP),
+  'EMISE'
+);
 
-      ('SIN2025-006', 'POL123789', '2345 IJ 34', 'Choc direct', 'Express',
-       '0667890123', 'NON_CLOTUREE', NOW() - INTERVAL '3 days',
-       NOW() - INTERVAL '2 days', 'Devis en attente de validation'),
+INSERT INTO notes_honoraires (mission_id, numero_note, description, montant_ht, taux_tva, montant_tva, montant_ttc, observations, date_creation, statut)
+VALUES (
+  (SELECT id FROM missions WHERE ref_sinistre = 'HON-002'),
+  'NOTE-2024-003',
+  'Honoraires EAD véhicule utilitaire léger - expertise à distance',
+  6500.00, 20.00, 1300.00, 7800.00,
+  'Note validée par l''assureur',
+  DATEADD('DAY', -3, CURRENT_TIMESTAMP),
+  'REGLEE'
+);
 
-      ('SIN2025-007', 'POL456123', '6789 KL 56', 'EAD', 'Classique',
-       '0678901234', 'NON_CLOTUREE', NOW() - INTERVAL '5 days',
-       NOW() - INTERVAL '4 days', 'Réparation en cours - suivi nécessaire'),
-
-      ('SIN2025-008', 'POL789456', '0123 MN 78', 'Incendie', 'Premium',
-       '0689012345', 'NON_CLOTUREE', NOW() - INTERVAL '1 week',
-       NOW() - INTERVAL '6 days', 'Expertise complexe - rapport à venir');
-
--- ============================================
--- MISSIONS REFUSÉES
--- ============================================
-INSERT INTO missions (
-    ref_sinistre, num_police, immatriculation, type_mission, parcours,
-    tel_assure, statut, date_creation, date_affectation, motif_refus, observations
-) VALUES
-      ('SN-2026-REF-01', 'POL-RE-444', '3456 EF 56', 'Physique', 'Standard',
-       '0600112233', 'REFUSEE', NOW() - INTERVAL '2 days',
-       NOW() - INTERVAL '1 day', 'Expert indisponible', 'Refusé car expert non disponible'),
-
-      ('SIN2025-009', 'POL012345', '4567 OP 90', 'EAD', 'Classique',
-       '0690123456', 'REFUSEE', NOW() - INTERVAL '4 days',
-       NOW() - INTERVAL '3 days', 'Hors délai de déclaration',
-       'Déclaration trop tardive - non couvert'),
-
-      ('SIN2025-010', 'POL678901', '8901 QR 12', 'Choc direct', 'Express',
-       '0601234567', 'REFUSEE', NOW() - INTERVAL '6 days',
-       NOW() - INTERVAL '5 days', 'Fausse déclaration',
-       'Informations contradictoires - refus après enquête'),
-
-      ('SIN2025-011', 'POL234567', '1234 ST 34', 'EAD', 'Classique',
-       '0612345678', 'REFUSEE', NOW() - INTERVAL '1 week',
-       NOW() - INTERVAL '6 days', 'Non couverture du risque',
-       'Garantie non applicable au sinistre'),
-
-      ('SIN2025-012', 'POL890123', '5678 UV 56', 'Vol', 'Premium',
-       '0623456789', 'REFUSEE', NOW() - INTERVAL '8 days',
-       NOW() - INTERVAL '7 days', 'Défaut de déclaration en mairie',
-       'Pas de dépôt de plainte dans les délais');
-
--- ============================================
--- MISSIONS EN CARENCE
--- ============================================
-INSERT INTO missions (
-    ref_sinistre, num_police, immatriculation, type_mission, parcours,
-    tel_assure, statut, date_creation, date_affectation, observations
-) VALUES
-      ('SN-2025-0089', 'POL-XP-112', '9012 CD 34', 'EAD', 'Standard',
-       '0655443322', 'CARENCE', NOW() - INTERVAL '10 days',
-       NOW() - INTERVAL '9 days', 'Délai dépassé - action requise'),
-
-      ('SIN2025-013', 'POL456789', '7890 WX 78', 'EAD', 'Classique',
-       '0634567890', 'CARENCE', NOW() - INTERVAL '5 days',
-       NOW() - INTERVAL '4 days', 'Délai dépassé - relance nécessaire'),
-
-      ('SIN2025-014', 'POL012678', '1234 YZ 90', 'Choc direct', 'Express',
-       '0645678901', 'CARENCE', NOW() - INTERVAL '6 days',
-       NOW() - INTERVAL '5 days', 'Plus de 48h sans réponse expert'),
-
-      ('SIN2025-015', 'POL345901', '5678 AB 12', 'EAD', 'Classique',
-       '0656789012', 'CARENCE', NOW() - INTERVAL '7 days',
-       NOW() - INTERVAL '6 days', 'Dossier bloqué - action requise'),
-
-      ('SIN2025-016', 'POL678234', '9012 CD 34', 'Incendie', 'Premium',
-       '0667890123', 'CARENCE', NOW() - INTERVAL '8 days',
-       NOW() - INTERVAL '7 days', 'Expert non disponible - réaffectation');
-
--- ============================================
--- MISSIONS NOTES D'HONORAIRES
--- ============================================
-INSERT INTO missions (
-    ref_sinistre, num_police, immatriculation, type_mission, parcours,
-    tel_assure, statut, date_creation, date_affectation, observations
-) VALUES
-      ('SN-2026-HON-01', 'POL-HON-123', '7890 GH 12', 'EAD', 'Premium',
-       '0678901234', 'HONORAIRES', NOW() - INTERVAL '3 days',
-       NOW() - INTERVAL '2 days', 'Honoraires à régler - 450€'),
-
-      ('SIN2025-017', 'POL901567', '3456 EF 56', 'EAD', 'Classique',
-       '0678901234', 'HONORAIRES', NOW() - INTERVAL '3 days',
-       NOW() - INTERVAL '2 days', 'Honoraires à régler - 450€'),
-
-      ('SIN2025-018', 'POL234890', '7890 GH 78', 'Expertise', 'Premium',
-       '0689012345', 'HONORAIRES', NOW() - INTERVAL '4 days',
-       NOW() - INTERVAL '3 days', 'Note d''honoraires - 850€'),
-
-      ('SIN2025-019', 'POL567123', '1234 IJ 90', 'EAD', 'Classique',
-       '0690123456', 'HONORAIRES', NOW() - INTERVAL '5 days',
-       NOW() - INTERVAL '4 days', 'Frais d''expertise - 320€'),
-
-      ('SIN2025-020', 'POL890456', '5678 KL 12', 'Choc direct', 'Express',
-       '0601234567', 'HONORAIRES', NOW() - INTERVAL '6 days',
-       NOW() - INTERVAL '5 days', 'Honoraires - 275€');
-
--- ============================================
--- MISSIONS CLÔTURÉES
--- ============================================
-INSERT INTO missions (
-    ref_sinistre, num_police, immatriculation, type_mission, parcours,
-    tel_assure, statut, date_creation, date_affectation, date_cloture, observations
-) VALUES
-      ('SN-2025-CLO-01', 'POL-CLO-789', '9012 MN 34', 'Vol', 'Premium',
-       '0689012345', 'CLOTUREE', NOW() - INTERVAL '15 days',
-       NOW() - INTERVAL '14 days', NOW() - INTERVAL '3 days',
-       'Dossier clôturé - indemnisation versée'),
-
-      ('SIN2025-021', 'POL123567', '9012 MN 34', 'EAD', 'Classique',
-       '0612345678', 'CLOTUREE', NOW() - INTERVAL '10 days',
-       NOW() - INTERVAL '9 days', NOW() - INTERVAL '2 days',
-       'Dossier clôturé - indemnisation versée'),
-
-      ('SIN2025-022', 'POL456890', '3456 OP 56', 'Vol', 'Premium',
-       '0623456789', 'CLOTUREE', NOW() - INTERVAL '12 days',
-       NOW() - INTERVAL '11 days', NOW() - INTERVAL '3 days',
-       'Véhicule retrouvé - dossier clôturé'),
-
-      ('SIN2025-023', 'POL789123', '7890 QR 78', 'Incendie', 'Premium',
-       '0634567890', 'CLOTUREE', NOW() - INTERVAL '15 days',
-       NOW() - INTERVAL '14 days', NOW() - INTERVAL '5 days',
-       'Expertise terminée - rapport final envoyé');
-
--- ============================================
--- VÉRIFICATION (décommenter pour tester)
--- ============================================
--- SELECT statut, COUNT(*) FROM missions GROUP BY statut;
+INSERT INTO notes_honoraires (mission_id, numero_note, description, montant_ht, taux_tva, montant_tva, montant_ttc, observations, date_creation, statut)
+VALUES (
+  (SELECT id FROM missions WHERE ref_sinistre = 'HON-003'),
+  'NOTE-2024-004',
+  'Honoraires contrôle post-réparation - vérification qualité travaux',
+  3500.00, 20.00, 700.00, 4200.00,
+  'Contrôle satisfaisant - travaux conformes',
+  DATEADD('DAY', -1, CURRENT_TIMESTAMP),
+  'EMISE'
+);

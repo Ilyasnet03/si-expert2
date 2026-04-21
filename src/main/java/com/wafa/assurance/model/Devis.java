@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,20 +31,20 @@ public class Devis {
     private TypeDevis typeDevis;
 
     @Column(name = "montant_pieces", precision = 10, scale = 2)
-    private Double montantPieces;
+    private BigDecimal montantPieces;
 
     @Column(name = "montant_peinture", precision = 10, scale = 2)
-    private Double montantPeinture;
+    private BigDecimal montantPeinture;
 
     @Column(name = "montant_main_oeuvre", precision = 10, scale = 2)
-    private Double montantMainOeuvre;
+    private BigDecimal montantMainOeuvre;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type_operation")
     private TypeOperation typeOperation;
 
     @Column(name = "montant_total", precision = 10, scale = 2)
-    private Double montantTotal;
+    private BigDecimal montantTotal;
 
     @Column(name = "demande_expertise_contradictoire")
     private Boolean demandeExpertiseContradictoire;
@@ -51,18 +52,29 @@ public class Devis {
     @Column(name = "observations", columnDefinition = "TEXT")
     private String observations;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statut")
+    private StatutDevis statut;
+
+    @Column(name = "chemin_image")
+    private String cheminImage;
+
     @Column(name = "date_creation")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateCreation;
 
     @Column(name = "montant_pieces_accorde", precision = 10, scale = 2)
-    private Double montantPiecesAccorde;
+    private BigDecimal montantPiecesAccorde;
 
     @Column(name = "montant_peinture_accorde", precision = 10, scale = 2)
-    private Double montantPeintureAccorde;
+    private BigDecimal montantPeintureAccorde;
 
     @Column(name = "montant_main_oeuvre_accorde", precision = 10, scale = 2)
-    private Double montantMainOeuvreAccorde;
+    private BigDecimal montantMainOeuvreAccorde;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type_operation_accorde")
+    private TypeOperation typeOperationAccorde;
 
     @PrePersist
     protected void onCreate() {
@@ -74,9 +86,9 @@ public class Devis {
         }
     }
 
-    public Double getMontantTotalAccorde() {
+    public BigDecimal getMontantTotalAccorde() {
         if (montantPiecesAccorde != null && montantPeintureAccorde != null && montantMainOeuvreAccorde != null) {
-            return montantPiecesAccorde + montantPeintureAccorde + montantMainOeuvreAccorde;
+            return montantPiecesAccorde.add(montantPeintureAccorde).add(montantMainOeuvreAccorde);
         }
         return null;
     }

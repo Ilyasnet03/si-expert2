@@ -1,0 +1,122 @@
+<div th:fragment="header">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, #0f2027, #203a43); box-shadow: 0 2px 15px rgba(0,0,0,0.3);">
+  <div class="container-fluid px-4">
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+      <i class="fas fa-shield-halved me-2" style="font-size:24px; color:#64b5f6;"></i>
+      <span style="font-weight:700; font-size:20px;">SI Expert</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Menu principal -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="/admin/dashboard">
+            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/missions">
+            <i class="fas fa-tasks me-1"></i> Missions
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/sinistres">
+            <i class="fas fa-car-crash me-1"></i> Sinistres
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/expertises">
+            <i class="fas fa-search me-1"></i> Expertises
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/users">
+            <i class="fas fa-users me-1"></i> Utilisateurs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/reports">
+            <i class="fas fa-chart-bar me-1"></i> Rapports
+          </a>
+        </li>
+      </ul>
+
+      <!-- Droite : horloge + notifications + profil -->
+      <ul class="navbar-nav align-items-center">
+        <!-- Horloge temps réel -->
+        <li class="nav-item me-3">
+          <span class="text-light" id="live-clock" style="font-size:13px; opacity:0.8;">
+            <i class="fas fa-clock me-1"></i><span id="clock-time"></span>
+          </span>
+        </li>
+
+        <!-- Notifications -->
+        <li class="nav-item dropdown me-3">
+          <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-bell" style="font-size:18px;"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  id="notif-badge" th:text="${nbNotifications}" th:if="${nbNotifications > 0}">0</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow" style="width:360px; max-height:400px; overflow-y:auto;">
+            <li class="dropdown-header fw-bold">
+              <i class="fas fa-bell me-1"></i> Notifications
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li th:each="notif : ${notifications}" th:if="${notifications != null}">
+              <a class="dropdown-item d-flex align-items-start gap-2 py-2" th:href="${notif.lien}">
+                <i th:class="${notif.icone}" th:classappend="' text-' + ${notif.couleur}" style="margin-top:3px;"></i>
+                <div>
+                  <div style="font-size:13px;" th:text="${notif.message}"></div>
+                  <small class="text-muted" th:text="${notif.date}"></small>
+                </div>
+              </a>
+            </li>
+            <li th:if="${notifications == null || notifications.isEmpty()}">
+              <span class="dropdown-item text-muted text-center">Aucune notification</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Profil admin -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2"
+                 style="width:32px; height:32px; font-size:14px; font-weight:700;">
+              <i class="fas fa-user-shield text-white"></i>
+            </div>
+            <span class="d-none d-lg-inline" th:text="${userName}" style="font-size:14px;">Admin</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow">
+            <li><a class="dropdown-item" href="/admin/profil"><i class="fas fa-user me-2"></i>Mon profil</a></li>
+            <li><a class="dropdown-item" href="/admin/settings"><i class="fas fa-cog me-2"></i>Paramètres</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="dropdown-item text-danger">
+                  <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                </button>
+              </form>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Script horloge -->
+<script>
+function updateClock() {
+    const now = new Date();
+    const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    document.getElementById('clock-time').textContent = now.toLocaleDateString('fr-FR', options);
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</div>

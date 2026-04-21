@@ -2,6 +2,7 @@ package com.wafa.assurance.repository;
 
 import com.wafa.assurance.model.Mission;
 import com.wafa.assurance.model.StatutMission;
+import com.wafa.assurance.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,10 +12,6 @@ import java.util.List;
 
 @Repository
 public interface MissionRepository extends JpaRepository<Mission, Long> {
-
-    // ✅ Filtrer par statut (version avec String - gardée pour compatibilité)
-    List<Mission> findByStatut(String statut);
-
 
     List<Mission> findByStatut(StatutMission statut);
 
@@ -27,11 +24,29 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
     // ✅ Missions récentes (dernières 24h)
     List<Mission> findByDateCreationAfter(LocalDateTime date);
 
+    // ✅ Missions par période
+    List<Mission> findByDateCreationBetween(LocalDateTime debut, LocalDateTime fin);
+
     // ✅ Missions en carence (délai dépassé)
     @Query("SELECT m FROM Mission m WHERE m.dateAffectation IS NOT NULL " +
             "AND m.dateAffectation < :dateLimite " +
             "AND m.statut != com.wafa.assurance.model.StatutMission.CLOTUREE")
     List<Mission> findMissionsEnCarence(@Param("dateLimite") LocalDateTime dateLimite);
+
+    @Query("SELECT m FROM Mission m WHERE m.expert = :expert " +
+        "AND m.estEnCarence = true " +
+        "ORDER BY m.dateCarence DESC, m.dateCreation DESC")
+    List<Mission> findByExpertAndEstEnCarenceTrueOrderByDateCarenceDesc(@Param("expert") User expert);
+
+    List<Mission> findByExpertAndStatutOrderByDateCreationDesc(User expert, StatutMission statut);
+
+    List<Mission> findByStatutIn(List<StatutMission> statuts);
+
+    @Query("SELECT m FROM Mission m WHERE m.statut IN :statuts AND m.estEnCarence = false AND m.dateAffectation IS NOT NULL")
+    List<Mission> findEligibleForCarence(@Param("statuts") List<StatutMission> statuts);
+
+    @Query("SELECT m FROM Mission m WHERE m.statut = com.wafa.assurance.model.StatutMission.REFUSEE ORDER BY m.dateCreation DESC")
+    List<Mission> findRefuseesOrderByDateCreationDesc();
 
     // ✅ Missions non clôturées (spécifique)
     @Query("SELECT m FROM Mission m WHERE m.statut != com.wafa.assurance.model.StatutMission.CLOTUREE")

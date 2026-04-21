@@ -1,10 +1,14 @@
 package com.wafa.assurance.service;
 
 import com.wafa.assurance.dto.MissionDTO;
+import com.wafa.assurance.dto.MissionRefusDTO;
+import com.wafa.assurance.dto.MissionTransitionDTO;
+import com.wafa.assurance.dto.MissionReouvertureRequest;
 import com.wafa.assurance.dto.PhotoDTO;
 import com.wafa.assurance.dto.DevisDTO;
 import com.wafa.assurance.dto.ExpertiseDTO;
 import com.wafa.assurance.dto.NoteHonoraireDTO;
+import com.wafa.assurance.dto.RefusRequest;
 import com.wafa.assurance.model.*;
 import com.wafa.assurance.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +46,27 @@ public class MissionService {
 
     @Autowired
     private NoteHonoraireRepository noteHonoraireRepository;
+
+    @Autowired
+    private NotificationCenterService notificationCenterService;
+
+    @Autowired
+    private CurrentUserService currentUserService;
+
+    @Autowired
+    private MissionStateMachineService missionStateMachineService;
+
+    @Autowired
+    private MissionRefusRepository missionRefusRepository;
+
+    @Autowired
+    private MissionTransitionRepository missionTransitionRepository;
+
+    @Autowired
+    private MissionReouvertureRepository missionReouvertureRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public Page<MissionDTO> search(
             String refSinistre,
@@ -95,41 +120,101 @@ public class MissionService {
     public MissionDTO accepter(Long id, boolean signalerInvestigation) {
         Mission mission = missionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
+        User expertCourant = currentUserService.requireCurrentUser();
         
-        mission.setStatut(StatutMission.NON_CLOTUREE);
+        mission.setExpert(expertCourant);
         mission.setDateAffectation(LocalDateTime.now());
+        mission.setEstEnCarence(false);
+        mission.setDateCarence(null);
+        mission.setDureeCarenceHeures(0);
         
         if (signalerInvestigation) {
             mission.setObservations((mission.getObservations() != null ? mission.getObservations() + "\n" : "")
                 + "[Investigation signalée " + LocalDateTime.now() + "]");
         }
         
-        Mission updated = missionRepository.save(mission);
+        Mission updated = missionStateMachineService.transition(
+            mission,
+            StatutMission.NON_CLOTUREE,
+            expertCourant,
+            signalerInvestigation ? "Mission acceptée avec signalement d'investigation." : "Mission acceptée par l'expert."
+        );
+        notificationCenterService.publish(
+            "MISSION_ASSIGNEE",
+            "Nouvelle mission assignée",
+            "La mission " + updated.getRefSinistre() + " a été acceptée par " + expertCourant.getPrenom() + " " + expertCourant.getNom() + ".",
+            "/missions/" + updated.getId()
+        );
         return MissionDTO.fromEntity(updated);
     }
 
-    public MissionDTO refuser(Long id, String motif) {
+    public MissionDTO refuser(Long id, RefusRequest request) {
         Mission mission = missionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
+        User expertCourant = currentUserService.requireCurrentUser();
+
+        if (request.getMotif() == null) {
+            throw new IllegalArgumentException("Le motif de refus est obligatoire.");
+        }
+        if (request.getMotif() == MotifRefus.AUTRE && (request.getCommentaire() == null || request.getCommentaire().isBlank())) {
+            throw new IllegalArgumentException("Le commentaire est obligatoire pour le motif AUTRE.");
+        }
         
         mission.setStatut(StatutMission.REFUSEE);
-        mission.setMotifRefus(motif);
+        mission.setMotifRefus(request.getMotif().getLibelle() + (request.getCommentaire() != null && !request.getCommentaire().isBlank() ? " - " + request.getCommentaire().trim() : ""));
+        mission.setEstEnCarence(false);
+        mission.setDateCarence(null);
+        mission.setDureeCarenceHeures(0);
         
-        Mission updated = missionRepository.save(mission);
+        MissionRefus refus = new MissionRefus();
+        refus.setMission(mission);
+        refus.setExpert(expertCourant);
+        refus.setMotif(request.getMotif());
+        refus.setCommentaire(request.getCommentaire());
+        missionRefusRepository.save(refus);
+
+        Mission updated = missionStateMachineService.transition(
+            mission,
+            StatutMission.REFUSEE,
+            expertCourant,
+            "Mission refusée. Motif: " + request.getMotif().getLibelle() + (request.getCommentaire() != null && !request.getCommentaire().isBlank() ? " - " + request.getCommentaire().trim() : "")
+        );
+        notificationCenterService.publish(
+            "MISSION_REFUSEE",
+            "Mission refusée",
+            "La mission " + updated.getRefSinistre() + " a été refusée par " + expertCourant.getPrenom() + " " + expertCourant.getNom() + ".",
+            "/missions/" + updated.getId()
+        );
         return MissionDTO.fromEntity(updated);
     }
 
     public MissionDTO changerStatut(Long id, StatutMission statut) {
         Mission mission = missionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
-        
-        mission.setStatut(statut);
+        User acteur = currentUserService.requireCurrentUser();
+
+        if (mission.getStatut() == StatutMission.NON_CLOTUREE && statut == StatutMission.HONORAIRES) {
+            statut = StatutMission.HONORAIRES;
+        } else if ((mission.getStatut() == StatutMission.NON_CLOTUREE || mission.getStatut() == StatutMission.ACCEPTEE) && statut != StatutMission.CLOTUREE) {
+            statut = StatutMission.EN_COURS;
+        }
         
         if (statut == StatutMission.CLOTUREE) {
             mission.setDateCloture(LocalDateTime.now());
         }
+        if (statut == StatutMission.EN_COURS) {
+            mission.setEstEnCarence(false);
+            mission.setDateCarence(null);
+            mission.setDureeCarenceHeures(0);
+        }
         
-        Mission updated = missionRepository.save(mission);
+        Mission updated = missionStateMachineService.transition(mission, statut, acteur, "Mise à jour du statut métier.");
+        notificationCenterService.publish(
+            "MISSION_STATUT",
+            "Changement de statut mission",
+            "La mission " + updated.getRefSinistre() + " est passée au statut " + updated.getStatut().getLibelle() + ".",
+            "/missions/" + updated.getId()
+        );
         return MissionDTO.fromEntity(updated);
     }
 
@@ -196,9 +281,9 @@ public class MissionService {
 
     // ───────────────────────── Devis ─────────────────────────
     public List<DevisDTO> getDevis(Long missionId) {
-        Mission mission = missionRepository.findById(missionId)
+        missionRepository.findById(missionId)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
-        return devisRepository.findByMissionOrderByDateCreationDesc(mission)
+        return devisRepository.findByMissionIdOrderByDateCreationDesc(missionId)
             .stream()
             .map(DevisDTO::fromEntity)
             .collect(Collectors.toList());
@@ -266,9 +351,9 @@ public class MissionService {
 
     // ───────────────────────── Expertises ─────────────────────────
     public List<ExpertiseDTO> getExpertises(Long missionId) {
-        Mission mission = missionRepository.findById(missionId)
+        missionRepository.findById(missionId)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
-        return expertiseRepository.findByMissionOrderByDateExpertiseDesc(mission)
+        return expertiseRepository.findByMissionIdOrderByDateExpertiseDesc(missionId)
             .stream()
             .map(ExpertiseDTO::fromEntity)
             .collect(Collectors.toList());
@@ -281,7 +366,9 @@ public class MissionService {
         Expertise expertise = new Expertise();
         expertise.setMission(mission);
         expertise.setTypeExpertise(expertiseDTO.getTypeExpertise());
-        expertise.setDateExpertise(expertiseDTO.getDateExpertise());
+        if (expertiseDTO.getDateExpertise() != null) {
+            expertise.setDateExpertise(expertiseDTO.getDateExpertise());
+        }
         expertise.setLieu(expertiseDTO.getLieu());
         expertise.setKilometrage(expertiseDTO.getKilometrage());
         expertise.setEtatVehicule(expertiseDTO.getEtatVehicule());
@@ -290,7 +377,9 @@ public class MissionService {
         expertise.setCalculVVADE(expertiseDTO.getCalculVVADE());
         expertise.setArbitrage(expertiseDTO.getArbitrage());
         expertise.setExpertiseContradictoire(expertiseDTO.getExpertiseContradictoire());
-        expertise.setDateExpertiseContradictoire(expertiseDTO.getDateExpertiseContradictoire());
+        if (expertiseDTO.getDateExpertiseContradictoire() != null) {
+            expertise.setDateExpertiseContradictoire(expertiseDTO.getDateExpertiseContradictoire());
+        }
         expertise.setMontantExpertiseContradictoire(expertiseDTO.getMontantExpertiseContradictoire());
         expertise.setObservations(expertiseDTO.getObservations());
         expertise.setDateCreation(LocalDateTime.now());
@@ -308,7 +397,9 @@ public class MissionService {
         }
 
         expertise.setTypeExpertise(expertiseDTO.getTypeExpertise());
-        expertise.setDateExpertise(expertiseDTO.getDateExpertise());
+        if (expertiseDTO.getDateExpertise() != null) {
+            expertise.setDateExpertise(expertiseDTO.getDateExpertise());
+        }
         expertise.setLieu(expertiseDTO.getLieu());
         expertise.setKilometrage(expertiseDTO.getKilometrage());
         expertise.setEtatVehicule(expertiseDTO.getEtatVehicule());
@@ -317,7 +408,9 @@ public class MissionService {
         expertise.setCalculVVADE(expertiseDTO.getCalculVVADE());
         expertise.setArbitrage(expertiseDTO.getArbitrage());
         expertise.setExpertiseContradictoire(expertiseDTO.getExpertiseContradictoire());
-        expertise.setDateExpertiseContradictoire(expertiseDTO.getDateExpertiseContradictoire());
+        if (expertiseDTO.getDateExpertiseContradictoire() != null) {
+            expertise.setDateExpertiseContradictoire(expertiseDTO.getDateExpertiseContradictoire());
+        }
         expertise.setMontantExpertiseContradictoire(expertiseDTO.getMontantExpertiseContradictoire());
         expertise.setObservations(expertiseDTO.getObservations());
 
@@ -338,9 +431,9 @@ public class MissionService {
 
     // ───────────────────────── Notes Honoraires ─────────────────────────
     public List<NoteHonoraireDTO> getNotesHonoraire(Long missionId) {
-        Mission mission = missionRepository.findById(missionId)
+        missionRepository.findById(missionId)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
-        return noteHonoraireRepository.findByMissionOrderByDateCreationDesc(mission)
+        return noteHonoraireRepository.findByMissionIdOrderByDateCreationDesc(missionId)
             .stream()
             .map(NoteHonoraireDTO::fromEntity)
             .collect(Collectors.toList());
@@ -392,30 +485,55 @@ public class MissionService {
     public MissionDTO cloturer(Long id) {
         Mission mission = missionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
+        User acteur = currentUserService.requireCurrentUser();
 
         if (mission.getStatut() == StatutMission.CLOTUREE) {
             throw new RuntimeException("Mission déjà clôturée");
         }
 
-        mission.setStatut(StatutMission.CLOTUREE);
         mission.setDateCloture(LocalDateTime.now());
+        mission.setEstEnCarence(false);
 
-        Mission updated = missionRepository.save(mission);
+        Mission updated = missionStateMachineService.transition(mission, StatutMission.CLOTUREE, acteur, "Mission clôturée.");
+        notificationCenterService.publish(
+            "MISSION_CLOTUREE",
+            "Mission clôturée",
+            "La mission " + updated.getRefSinistre() + " a été clôturée.",
+            "/missions/" + updated.getId()
+        );
         return MissionDTO.fromEntity(updated);
     }
 
-    public MissionDTO rouvrir(Long id) {
+    public MissionDTO rouvrir(Long id, MissionReouvertureRequest request) {
         Mission mission = missionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
+        User acteur = currentUserService.requireCurrentUser();
 
         if (mission.getStatut() != StatutMission.CLOTUREE) {
             throw new RuntimeException("Seules les missions clôturées peuvent être rouvertes");
         }
+        if (request.getMotif() == null || request.getMotif().isBlank()) {
+            throw new IllegalArgumentException("Le motif de réouverture est obligatoire.");
+        }
 
-        mission.setStatut(StatutMission.NON_CLOTUREE);
         mission.setDateCloture(null);
+        mission.setDateReouverture(LocalDateTime.now());
+        mission.setEstEnCarence(false);
 
-        Mission updated = missionRepository.save(mission);
+        MissionReouverture reouverture = new MissionReouverture();
+        reouverture.setMission(mission);
+        reouverture.setMotif(request.getMotif());
+        reouverture.setCommentaire(request.getCommentaire());
+        reouverture.setOuvertPar(acteur);
+        missionReouvertureRepository.save(reouverture);
+
+        Mission updated = missionStateMachineService.transition(mission, StatutMission.REEXAMEN, acteur, "Mission rouverte. Motif: " + request.getMotif() + (request.getCommentaire() != null && !request.getCommentaire().isBlank() ? " - " + request.getCommentaire() : ""));
+        notificationCenterService.publish(
+            "MISSION_REEXAMEN",
+            "Mission rouverte",
+            "La mission " + updated.getRefSinistre() + " a été rouverte pour réexamen.",
+            "/missions/" + updated.getId()
+        );
         return MissionDTO.fromEntity(updated);
     }
 
@@ -428,6 +546,99 @@ public class MissionService {
 
         Mission updated = missionRepository.save(mission);
         return MissionDTO.fromEntity(updated);
+    }
+
+    public List<MissionDTO> getMissionsEnCarencePourExpertConnecte() {
+        User expert = currentUserService.requireCurrentUser();
+        return missionRepository.findByExpertAndEstEnCarenceTrueOrderByDateCarenceDesc(expert)
+            .stream()
+            .map(MissionDTO::fromEntity)
+            .toList();
+    }
+
+    public MissionDTO sortirDeCarence(Long id) {
+        Mission mission = missionRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
+        User acteur = currentUserService.requireCurrentUser();
+
+        mission.setEstEnCarence(false);
+        mission.setDateCarence(null);
+        mission.setDureeCarenceHeures(0);
+        Mission updated = missionStateMachineService.transition(mission, StatutMission.NON_CLOTUREE, acteur, "Sortie manuelle de carence par l'expert.");
+        notificationCenterService.publish(
+            "MISSION_CARENCE_TRAITEE",
+            "Mission sortie de carence",
+            "La mission " + updated.getRefSinistre() + " n'est plus en carence.",
+            "/missions/" + updated.getId()
+        );
+        return MissionDTO.fromEntity(updated);
+    }
+
+    public List<MissionRefusDTO> listRefuseesPourAdmin() {
+        return missionRefusRepository.findAllByOrderByDateRefusDesc()
+            .stream()
+            .map(MissionRefusDTO::fromEntity)
+            .toList();
+    }
+
+    public MissionDTO reaffecter(Long missionId, Long expertId) {
+        Mission mission = missionRepository.findById(missionId)
+            .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
+        User admin = currentUserService.requireCurrentUser();
+        User nouvelExpert = userRepository.findById(expertId)
+            .orElseThrow(() -> new RuntimeException("Expert introuvable"));
+
+        mission.setExpert(nouvelExpert);
+        mission.setMotifRefus(null);
+        mission.setDateAffectation(LocalDateTime.now());
+        mission.setEstEnCarence(false);
+        mission.setDateCarence(null);
+        mission.setDureeCarenceHeures(0);
+
+        Mission updated = missionStateMachineService.transition(mission, StatutMission.NOUVELLE, admin, "Mission réaffectée à " + nouvelExpert.getPrenom() + " " + nouvelExpert.getNom() + ".");
+        notificationCenterService.publish(
+            "CHANGEMENT_EXPERT",
+            "Mission réaffectée",
+            "La mission " + updated.getRefSinistre() + " a été réaffectée à " + nouvelExpert.getPrenom() + " " + nouvelExpert.getNom() + ".",
+            "/missions/" + updated.getId()
+        );
+        return MissionDTO.fromEntity(updated);
+    }
+
+    public List<MissionTransitionDTO> getTransitions(Long missionId) {
+        return missionTransitionRepository.findByMissionIdOrderByDateTransitionAsc(missionId)
+            .stream()
+            .map(MissionTransitionDTO::fromEntity)
+            .toList();
+    }
+
+    public int appliquerCarence(Long missionId, int seuilHeures) {
+        Mission mission = missionRepository.findById(missionId)
+            .orElseThrow(() -> new RuntimeException("Mission non trouvée"));
+
+        if (mission.getDateAffectation() == null || mission.getDateCloture() != null) {
+            return 0;
+        }
+
+        long duree = java.time.Duration.between(mission.getDateAffectation(), LocalDateTime.now()).toHours();
+        mission.setDureeCarenceHeures((int) Math.max(0, duree));
+
+        if (duree < seuilHeures || Boolean.TRUE.equals(mission.getEstEnCarence())) {
+            missionRepository.save(mission);
+            return 0;
+        }
+
+        mission.setEstEnCarence(true);
+        mission.setDateCarence(LocalDateTime.now());
+        missionStateMachineService.transition(mission, StatutMission.CARENCE, null, "Passage automatique en carence après " + seuilHeures + "h.");
+
+        notificationCenterService.publish(
+            "MISSION_EN_CARENCE",
+            "Mission en carence",
+            "Mission N°" + mission.getNumeroMission() + " est en carence.",
+            "/missions/" + mission.getId()
+        );
+        return 1;
     }
 
     // ───────────────────────── Statistiques ─────────────────────────

@@ -1,6 +1,8 @@
 package com.wafa.assurance.controller;
 
 import com.wafa.assurance.dto.MissionDTO;
+import com.wafa.assurance.dto.MissionReouvertureRequest;
+import com.wafa.assurance.dto.MissionTransitionDTO;
 import com.wafa.assurance.dto.RefusRequest;
 import com.wafa.assurance.model.StatutMission;
 import com.wafa.assurance.repository.MissionRepository;
@@ -65,7 +67,7 @@ public class MissionController {
     public ResponseEntity<MissionDTO> refuser(
             @PathVariable Long id,
             @RequestBody @Valid RefusRequest req) {
-        return ResponseEntity.ok(missionService.refuser(id, req.getMotif()));
+        return ResponseEntity.ok(missionService.refuser(id, req));
     }
 
     // ───────────────────────── Statut générique ───────────────────
@@ -182,5 +184,54 @@ public class MissionController {
             default -> 0L;
         };
         return ResponseEntity.ok(count);
+    }
+
+    // ───────────────────────── Actions ─────────────────────────
+    @PostMapping("/{id}/actions/cloturer")
+    public ResponseEntity<MissionDTO> cloturer(@PathVariable Long id) {
+        return ResponseEntity.ok(missionService.cloturer(id));
+    }
+
+    @PostMapping("/{id}/actions/rouvrir")
+    public ResponseEntity<MissionDTO> rouvrir(@PathVariable Long id, @RequestBody @Valid MissionReouvertureRequest request) {
+        return ResponseEntity.ok(missionService.rouvrir(id, request));
+    }
+
+    @PostMapping("/{id}/actions/signaler-investigation")
+    public ResponseEntity<MissionDTO> signalerInvestigation(@PathVariable Long id) {
+        return ResponseEntity.ok(missionService.signalerInvestigation(id));
+    }
+
+    @GetMapping("/corbeille/carence")
+    public ResponseEntity<List<MissionDTO>> getCorbeilleCarenceExpertConnecte() {
+        return ResponseEntity.ok(missionService.getMissionsEnCarencePourExpertConnecte());
+    }
+
+    @PostMapping("/{id}/sortir-carence")
+    public ResponseEntity<MissionDTO> sortirCarence(@PathVariable Long id) {
+        return ResponseEntity.ok(missionService.sortirDeCarence(id));
+    }
+
+    @GetMapping("/{id}/transitions")
+    public ResponseEntity<List<MissionTransitionDTO>> getTransitions(@PathVariable Long id) {
+        return ResponseEntity.ok(missionService.getTransitions(id));
+    }
+
+    // ───────────────────────── Statistiques ─────────────────────────
+    @GetMapping("/stats/mensuelles")
+    public ResponseEntity<Map<String, Object>> getStatsMensuelles(
+            @RequestParam @DateTimeFormat(iso = DATE) LocalDate dateDebut,
+            @RequestParam @DateTimeFormat(iso = DATE) LocalDate dateFin) {
+        return ResponseEntity.ok(missionService.getStatsMensuelles(dateDebut, dateFin));
+    }
+
+    @GetMapping("/stats/taux-cloture")
+    public ResponseEntity<Map<String, Object>> getTauxCloture() {
+        return ResponseEntity.ok(missionService.getTauxCloture());
+    }
+
+    @GetMapping("/stats/performance")
+    public ResponseEntity<Map<String, Object>> getPerformanceStats() {
+        return ResponseEntity.ok(missionService.getPerformanceStats());
     }
 }

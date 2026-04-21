@@ -11,5 +11,6 @@ public class AccordDevisRequest {
     private BigDecimal montantAccordePeinture;
     private BigDecimal montantAccordeMainOeuvre;
     private BigDecimal montantAccordeTotal;
+    private String typeOperationAccorde;
     private String observations;
 }

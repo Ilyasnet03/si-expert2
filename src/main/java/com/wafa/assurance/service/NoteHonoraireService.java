@@ -4,6 +4,7 @@ import com.wafa.assurance.dto.NoteHonoraireDTO;
 import com.wafa.assurance.dto.NoteHonoraireRequest;
 import com.wafa.assurance.model.Mission;
 import com.wafa.assurance.model.NoteHonoraire;
+import com.wafa.assurance.model.StatutNoteHonoraire;
 import com.wafa.assurance.repository.MissionRepository;
 import com.wafa.assurance.repository.NoteHonoraireRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +33,23 @@ public class NoteHonoraireService {
     @Autowired
     private MissionRepository missionRepository;
 
+    @Autowired
+    private NotificationCenterService notificationCenterService;
+
     @Value("${app.upload.dir:./uploads}")
     private String uploadDir;
 
     public List<NoteHonoraireDTO> findByMission(Long missionId) {
-        return noteHonoraireRepository.findByMissionIdOrderByCreatedAtDesc(missionId)
+        return noteHonoraireRepository.findByMissionIdOrderByDateCreationDesc(missionId)
             .stream()
-            .map(NoteHonoraireDTO::from)
+            .map(NoteHonoraireDTO::fromEntity)
+            .collect(Collectors.toList());
+    }
+
+    public List<NoteHonoraireDTO> findAll() {
+        return noteHonoraireRepository.findAllByOrderByDateCreationDesc()
+            .stream()
+            .map(NoteHonoraireDTO::fromEntity)
             .collect(Collectors.toList());
     }
 
@@ -68,6 +79,9 @@ public class NoteHonoraireService {
         noteHonoraire.setMontantTTC(montantTTC);
         
         noteHonoraire.setObservations(req.getObservations());
+        if (req.getStatut() != null) {
+            noteHonoraire.setStatut(StatutNoteHonoraire.valueOf(req.getStatut()));
+        }
 
         // Upload fichier PDF si fourni
         if (fichier != null && !fichier.isEmpty()) {
@@ -77,6 +91,12 @@ public class NoteHonoraireService {
         }
 
         NoteHonoraire saved = noteHonoraireRepository.save(noteHonoraire);
+        notificationCenterService.publish(
+            "NOTE_HONORAIRE",
+            "Nouvelle note d'honoraire",
+            "La note " + saved.getNumeroNote() + " a été publiée.",
+            "/missions/" + missionId + "/honoraires"
+        );
         return NoteHonoraireDTO.from(saved);
     }
 
@@ -97,6 +117,9 @@ public class NoteHonoraireService {
         }
         if (req.getObservations() != null) {
             noteHonoraire.setObservations(req.getObservations());
+        }
+        if (req.getStatut() != null) {
+            noteHonoraire.setStatut(StatutNoteHonoraire.valueOf(req.getStatut()));
         }
 
         NoteHonoraire updated = noteHonoraireRepository.save(noteHonoraire);

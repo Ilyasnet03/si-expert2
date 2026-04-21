@@ -41,6 +41,10 @@ public class Mission {
     @Column(name = "statut")
     private StatutMission statut;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "expert_id")
+    private User expert;
+
     @Column(name = "motif_refus", columnDefinition = "TEXT")
     private String motifRefus;
 
@@ -52,9 +56,23 @@ public class Mission {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateAffectation;
 
+    @Column(name = "est_en_carence")
+    private Boolean estEnCarence = false;
+
+    @Column(name = "date_carence")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dateCarence;
+
+    @Column(name = "duree_carence_heures")
+    private Integer dureeCarenceHeures;
+
     @Column(name = "date_cloture")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateCloture;
+
+    @Column(name = "date_reouverture")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dateReouverture;
 
     @Column(name = "observations", columnDefinition = "TEXT")
     private String observations;

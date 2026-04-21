@@ -1,37 +1,43 @@
 spring:
   application:
     name: si-expert
-  
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/si_expert_db
-    username: postgres
-    password: password111
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      # MODIFICATION : 'create-drop' pour vider la base et charger le script proprement
       ddl-auto: create-drop
-    show-sql: true
-    # CRUCIAL : Attend la création des tables avant d'insérer les données du script
+    show-sql: false
     defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: true
-        jdbc:
-          lob:
-            non_contextual_creation: true
 
-  # CONFIGURATION DES DONNÉES DE TEST
+  h2:
+    console:
+      enabled: true
+
   sql:
     init:
-      mode: always
-      platform: postgresql
-      data-locations: classpath:data.sql
-      encoding: UTF-8
+      mode: never
 
   jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/si-expert}
+
+  jwt:
+    secret: mySecretKey1234567890123456789012345678901234567890
+    expiration: 86400000
     date-format: "yyyy-MM-dd HH:mm:ss"
     time-zone: Africa/Casablanca
 
@@ -42,8 +48,20 @@ spring:
 
 # Configuration d'upload des fichiers
 app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  keycloak:
+    admin:
+      server-url: ${KEYCLOAK_ADMIN_SERVER_URL:http://localhost:8081}
+      realm: ${KEYCLOAK_ADMIN_TARGET_REALM:si-expert}
+      admin-realm: ${KEYCLOAK_ADMIN_AUTH_REALM:master}
+      client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+      client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+      username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+      password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
   upload:
     dir: ./uploads
+  carence:
+    threshold-hours: ${APP_CARENCE_THRESHOLD_HOURS:48}
   port: 8080
 
 logging:
@@ -52,3 +70,8 @@ logging:
     org.hibernate.SQL: DEBUG
     # Pour voir si le script SQL est bien exécuté
     org.springframework.jdbc.datasource.init: DEBUG
+
+# Configuration JWT
+jwt:
+  secret: mysupersecretkeythathas32characterslong!!!
+  expiration: 86400000  # 24 heures en millisecondes

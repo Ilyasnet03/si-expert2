@@ -18,6 +18,12 @@ public class MissionDTO {
     private String telAssure;
     private StatutMission statut;
     private String motifRefus;
+    private Long expertId;
+    private String expertNom;
+    private Boolean estEnCarence;
+    private LocalDateTime dateCarence;
+    private Integer dureeCarenceHeures;
+    private LocalDateTime dateReouverture;
     private LocalDateTime createdAt;
     private LocalDateTime dateAffectation;
     private LocalDateTime dateCloture;
@@ -44,6 +50,12 @@ public class MissionDTO {
         dto.setTelAssure(mission.getTelAssure());
         dto.setStatut(mission.getStatut());
         dto.setMotifRefus(mission.getMotifRefus());
+        dto.setExpertId(mission.getExpert() != null ? mission.getExpert().getId() : null);
+        dto.setExpertNom(mission.getExpert() != null ? mission.getExpert().getPrenom() + " " + mission.getExpert().getNom() : null);
+        dto.setEstEnCarence(Boolean.TRUE.equals(mission.getEstEnCarence()));
+        dto.setDateCarence(mission.getDateCarence());
+        dto.setDureeCarenceHeures(mission.getDureeCarenceHeures());
+        dto.setDateReouverture(mission.getDateReouverture());
         dto.setCreatedAt(mission.getDateCreation());
         dto.setDateAffectation(mission.getDateAffectation());
         dto.setDateCloture(mission.getDateCloture());

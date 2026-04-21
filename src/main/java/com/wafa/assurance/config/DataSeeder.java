@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.security.crypto.password.PasswordEncoder;
+@Component
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
@@ -23,6 +24,8 @@ public class DataSeeder implements CommandLineRunner {
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setNom("Admin");
                 admin.setPrenom("Système");
+                admin.setRole("ADMIN");
+                admin.setActif(true);
                 userRepository.save(admin);
 
                 User expert = new User();
@@ -30,6 +33,8 @@ public class DataSeeder implements CommandLineRunner {
                 expert.setPassword(passwordEncoder.encode("admin123"));
                 expert.setNom("Expert");
                 expert.setPrenom("Assurance");
+                expert.setRole("EXPERT");
+                expert.setActif(true);
                 userRepository.save(expert);
                 System.out.println("Users created");
             } else {

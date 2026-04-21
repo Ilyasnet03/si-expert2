@@ -51,7 +51,8 @@ cd frontend
 cp .env.example .env
 
 # Éditer .env avec les bonnes valeurs
-# REACT_APP_API_URL=http://localhost:8080/api
+# REACT_APP_API_BASE_URL=http://localhost:8080/api
+# REACT_APP_KEYCLOAK_URL=http://localhost:8081
 ```
 
 ## 📝 Variables Disponibles
@@ -79,9 +80,19 @@ RAPIDAPI_HOST=tecdoc-catalog.p.rapidapi.com
 
 ### Frontend React
 ```
+REACT_APP_API_BASE_URL=http://localhost:8080/api
 REACT_APP_API_URL=http://localhost:8080/api
+REACT_APP_KEYCLOAK_URL=http://localhost:8081
+REACT_APP_KEYCLOAK_REALM=si-expert
+REACT_APP_KEYCLOAK_CLIENT_ID=si-expert-frontend
 REACT_APP_ENV=development
 REACT_APP_DEBUG=true
+```
+
+### Keycloak Backend
+```
+FRONTEND_URL=http://localhost:3000
+KEYCLOAK_ISSUER_URI=http://localhost:8081/realms/si-expert
 ```
 
 ### Uploads
@@ -120,8 +131,14 @@ cat .gitignore | grep -E "^\.env"
 - Vérifier la syntaxe du `.env` (pas d'espaces autour du `=`)
 
 ### React ne se connecte pas à l'API
-- Vérifier que `REACT_APP_API_URL` est correct dans `frontend/.env`
+- Vérifier que `REACT_APP_API_BASE_URL` ou `REACT_APP_API_URL` est correct dans `frontend/.env`
+- Vérifier que `REACT_APP_KEYCLOAK_URL`, `REACT_APP_KEYCLOAK_REALM` et `REACT_APP_KEYCLOAK_CLIENT_ID` sont renseignées
 - Rebuild le frontend après modification: `npm run build`
+
+### La connexion Keycloak échoue
+- Vérifier que Keycloak est démarré et que le realm configuré existe
+- Vérifier que `KEYCLOAK_ISSUER_URI` correspond bien au realm exposé par Keycloak
+- Vérifier que `http://localhost:3000` est autorisée dans le client Keycloak
 
 ### Variables non lues
 - Les variables d'environnement ne sont lues qu'au démarrage

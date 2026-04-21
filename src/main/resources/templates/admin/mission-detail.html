@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détail Mission</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+</head>
+<body>
+<header th:replace="fragments/header :: header"></header>
+<h1>Détail de la mission <span th:text="${mission.numeroMission}"></span></h1>
+<section>
+    <h2>Informations du sinistre</h2>
+    <div th:object="${mission.sinistre}">
+        <p>Type : <span th:text="*{type}"></span></p>
+        <p>Date déclaration : <span th:text="*{dateDeclaration}"></span></p>
+        <p>Statut : <span th:text="*{statut}"></span></p>
+        <p>Expert assigné : <span th:text="*{expert}"></span></p>
+    </div>
+</section>
+<section>
+    <h2>Historique des expertises</h2>
+    <ul>
+        <li th:each="exp : ${mission.expertises}">
+            <span th:text="${exp.date}"></span> - <span th:text="${exp.description}"></span>
+        </li>
+    </ul>
+</section>
+<section>
+    <h2>Liste des devis</h2>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Montant</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+            <tr th:each="devis : ${mission.devis}">
+                <td th:text="${devis.id}"></td>
+                <td th:text="${devis.montantTotal}"></td>
+                <td th:text="${devis.statut}"></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+<section>
+    <h2>Photos téléchargées</h2>
+    <div th:each="photo : ${mission.photos}">
+        <img th:src="@{'/uploads/' + ${photo.path}}" alt="photo" width="120"/>
+    </div>
+</section>
+<section>
+    <h2>Notes d'honoraires</h2>
+    <ul>
+        <li th:each="note : ${mission.notesHonoraire}">
+            <span th:text="${note.montant}"></span> - <span th:text="${note.statut}"></span>
+        </li>
+    </ul>
+</section>
+<section>
+    <h2>Avancement</h2>
+    <ul>
+        <li th:each="etape,iter : ${mission.etapes}">
+            <span th:text="'Étape ' + ${iter.index+1} + '/4 : ' + ${etape}"></span>
+        </li>
+    </ul>
+    <progress th:value="${mission.progression}" max="100"></progress>
+</section>
+</body>
+</html>

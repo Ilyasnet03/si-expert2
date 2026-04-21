@@ -17,6 +17,8 @@ public class NoteHonoraireRequest {
     private BigDecimal montantHT;
     
     private BigDecimal tauxTVA;
+
+    private String statut;
     
     private String observations;
 }

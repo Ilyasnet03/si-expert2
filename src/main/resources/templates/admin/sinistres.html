@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des sinistres</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+</head>
+<body>
+<header th:replace="fragments/header :: header"></header>
+<h1>Sinistres</h1>
+<form method="get">
+    <label>Date : <input type="date" name="date" th:value="${date}"/></label>
+    <label>Type : <input type="text" name="type" th:value="${type}"/></label>
+    <label>Statut : <input type="text" name="statut" th:value="${statut}"/></label>
+    <label>Expert : <input type="text" name="expert" th:value="${expert}"/></label>
+    <button type="submit">Filtrer</button>
+</form>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Statut</th>
+            <th>Expert</th>
+            <th>Mission</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="sinistre : ${sinistres}">
+            <td th:text="${sinistre.id}"></td>
+            <td th:text="${sinistre.date}"></td>
+            <td th:text="${sinistre.type}"></td>
+            <td th:text="${sinistre.statut}"></td>
+            <td th:text="${sinistre.expert}"></td>
+            <td><a th:href="@{'/admin/missions/' + ${sinistre.missionId}}">Voir mission</a></td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

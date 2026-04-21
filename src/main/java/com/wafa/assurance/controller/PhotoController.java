@@ -30,10 +30,22 @@ public class PhotoController {
     public ResponseEntity<PhotoDTO> upload(
             @PathVariable Long missionId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam CategoriePhoto categorie) throws IOException {
+            @RequestParam CategoriePhoto categorie,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String type) throws IOException {
         return ResponseEntity.status(201).body(
-            photoService.sauvegarder(missionId, file, categorie)
+            photoService.sauvegarder(missionId, file, categorie, description, type)
         );
+    }
+
+    @PostMapping(value = "/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<PhotoDTO>> uploadBulk(
+            @PathVariable Long missionId,
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam CategoriePhoto categorie,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) List<String> descriptions) throws IOException {
+        return ResponseEntity.status(201).body(photoService.sauvegarderMultiple(missionId, files, categorie, type, descriptions));
     }
 
     @GetMapping("/{photoId}/image")
@@ -49,5 +61,14 @@ public class PhotoController {
     public ResponseEntity<Void> delete(@PathVariable Long missionId, @PathVariable Long photoId) throws IOException {
         photoService.supprimer(photoId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<Resource> downloadZip(@PathVariable Long missionId) throws IOException {
+        Resource resource = photoService.zipByMission(missionId);
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"photos-mission-" + missionId + ".zip\"")
+            .body(resource);
     }
 }

@@ -14,6 +14,7 @@ public class DevisRequest {
     private BigDecimal montantMainOeuvre;
     private BigDecimal montantTotal;
     private String typeOperation;
+    private String typeOperationAccorde;
     private boolean expertiseContradictoire;
     private String observations;
 }

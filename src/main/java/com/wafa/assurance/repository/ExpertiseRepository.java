@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ExpertiseRepository extends JpaRepository<Expertise, Long> {
-    List<Expertise> findByMissionIdOrderByCreatedAtDesc(Long missionId);
+    List<Expertise> findByMissionIdOrderByDateExpertiseDesc(Long missionId);
     Optional<Expertise> findById(Long id);
     void deleteById(Long id);
 }

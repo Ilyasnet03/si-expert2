@@ -24,7 +24,7 @@ spring:
 
   sql:
     init:
-      mode: never
+      mode: always
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
@@ -35,7 +35,14 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/si-expert}
+
 app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
   upload:
     dir: ./uploads
   port: 8080
